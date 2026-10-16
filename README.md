@@ -41,14 +41,36 @@ Plug 'Mofiqul/flatwhite.nvim'
 
 ## 🚀 Usage
 
+Four colorscheme variants are available:
+
+| Colorscheme | Background | Palette |
+|---|---|---|
+| `flatwhite` | light | Warm paper tones (original) |
+| `flatwhite-dark` | dark | Warm dark tones |
+| `flexoki-light` | light | [Flexoki](https://stephango.com/flexoki) inky pigments on paper |
+| `flexoki-dark` | dark | [Flexoki](https://stephango.com/flexoki) inky pigments on black |
+
 ```lua
 -- Lua:
-vim.cmd[[colorscheme flatwhite]]
+vim.cmd[[colorscheme flatwhite]]        -- light (default)
+vim.cmd[[colorscheme flatwhite-dark]]   -- dark
+vim.cmd[[colorscheme flexoki-light]]    -- flexoki light
+vim.cmd[[colorscheme flexoki-dark]]     -- flexoki dark
 ```
 
 ```vim
 " Vim-Script:
 colorscheme flatwhite
+colorscheme flatwhite-dark
+colorscheme flexoki-light
+colorscheme flexoki-dark
+```
+
+You can also set the variant via `setup()` before loading:
+
+```lua
+require("flatwhite").setup({ variant = "flexoki-dark" })
+vim.cmd[[colorscheme flexoki-dark]]
 ```
 
 If you are using [`lualine`](https://github.com/hoob3rt/lualine.nvim), you can also enable the provided theme:
@@ -59,7 +81,7 @@ If you are using [`lualine`](https://github.com/hoob3rt/lualine.nvim), you can a
 require('lualine').setup {
   options = {
     -- ...
-    theme = 'flatwhite'
+    theme = 'flatwhite'       -- or 'flatwhite-dark', 'flexoki-light', 'flexoki-dark'
     -- ...
   }
 }

@@ -1,1 +1,1 @@
-require("flatwhite").load()
+require("flatwhite").load("light")

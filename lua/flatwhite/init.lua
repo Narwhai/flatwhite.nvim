@@ -9,6 +9,7 @@ local tbl_deep_extend = vim.tbl_deep_extend
 ---@field transparent_bg boolean
 ---@field show_end_of_buffer boolean
 ---@field lualine_bg_color string?
+---@field variant "light"|"dark"|"flexoki-light"|"flexoki-dark"
 ---@field colors Palette
 ---@field overrides table<string, Highlight>
 local DEFAULT_CONFIG = {
@@ -17,6 +18,7 @@ local DEFAULT_CONFIG = {
    transparent_bg = false,
    show_end_of_buffer = false,
    lualine_bg_color = nil,
+   variant = "light",
    colors = require("flatwhite.palette"),
    overrides = {},
 }
@@ -75,19 +77,50 @@ end
 
 local local_configs = DEFAULT_CONFIG
 
+--- Resolve the palette based on variant
+---@param variant "light"|"dark"|"flexoki-light"|"flexoki-dark"
+---@return Palette
+local function resolve_palette(variant)
+   local palettes = {
+      light = "flatwhite.palette",
+      dark = "flatwhite.palette_dark",
+      ["flexoki-light"] = "flatwhite.palette_flexoki_light",
+      ["flexoki-dark"] = "flatwhite.palette_flexoki_dark",
+   }
+   return require(palettes[variant] or "flatwhite.palette")
+end
+
+--- Determine if a variant is dark
+---@param variant string
+---@return boolean
+local function is_dark(variant)
+   return variant == "dark" or variant == "flexoki-dark"
+end
+
 ---setup flatwhite colorscheme
 ---@param configs DefaultConfig?
 local function setup(configs)
    if type(configs) == "table" then
       local_configs = tbl_deep_extend("force", DEFAULT_CONFIG, configs) --[[@as DefaultConfig]]
+      -- If user set variant but didn't override colors, resolve palette from variant
+      if configs.variant and not configs.colors then
+         local_configs.colors = resolve_palette(local_configs.variant)
+      end
    end
 end
 
 ---load flatwhite colorscheme
-local function load()
+---@param variant "light"|"dark"|"flexoki-light"|"flexoki-dark"|nil
+local function load(variant)
    if vim.version().minor < 7 then
       vim.notify_once("flatwhite.nvim: you must use neovim 0.7 or higher")
       return
+   end
+
+   -- If variant is passed directly (e.g. from colors/*.lua), apply it
+   if variant then
+      local_configs.variant = variant
+      local_configs.colors = resolve_palette(variant)
    end
 
    -- reset colors
@@ -99,9 +132,9 @@ local function load()
       cmd("syntax reset")
    end
 
-   o.background = "dark"
+   o.background = is_dark(local_configs.variant) and "dark" or "light"
    o.termguicolors = true
-   g.colors_name = "flatwhite"
+   g.colors_name = local_configs.variant == "light" and "flatwhite" or local_configs.variant == "dark" and "flatwhite-dark" or local_configs.variant
 
    apply(local_configs)
 end
